@@ -24,7 +24,7 @@ const extensionReloaderPlugin =
         entries: {
           // TODO: reload manifest on update
           contentScript: 'contentScript',
-          extensionPage: ['popup', 'options'],
+          extensionPage: ['popup', 'options', 'dataViewer', 'dataViewerStandalone'],
         },
       })
     : () => {
@@ -60,6 +60,8 @@ module.exports = {
     contentScript: path.join(sourcePath, 'ContentScript', 'index.js'),
     popup: path.join(sourcePath, 'Popup', 'index.jsx'),
     options: path.join(sourcePath, 'Options', 'index.jsx'),
+    dataViewer: path.join(sourcePath, 'DataViewer', 'index.jsx'),
+    dataViewerStandalone: path.join(sourcePath, 'DataViewer', 'standalone.js'),
     background: path.join(sourcePath, 'background.js'),
   },
 
@@ -157,6 +159,20 @@ module.exports = {
       chunks: ['options'],
       hash: true,
       filename: 'options.html',
+    }),
+    new HtmlWebpackPlugin({
+      template: path.join(viewsPath, 'data-viewer.html'),
+      inject: 'body',
+      chunks: ['dataViewer'],
+      hash: true,
+      filename: 'data-viewer.html',
+    }),
+    new HtmlWebpackPlugin({
+      template: path.join(viewsPath, 'data-viewer-standalone.html'),
+      inject: 'body',
+      chunks: ['dataViewerStandalone'],
+      hash: true,
+      filename: 'data-viewer-standalone.html',
     }),
     // write css file(s) to build folder
     new MiniCssExtractPlugin({filename: 'css/[name].css'}),

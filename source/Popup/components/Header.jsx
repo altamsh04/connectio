@@ -1,46 +1,16 @@
 import React from 'react';
 import { Zap, Link, Database, TestTube } from 'lucide-react';
-import { getAllStoredGitHubData, testBackgroundScript } from '../handlers/buttonHandlers';
+import { testBackgroundScript } from '../handlers/buttonHandlers';
 
 const Header = () => {
   const handleViewStoredData = async () => {
     try {
-      const data = await getAllStoredGitHubData();
-      
-      if (Object.keys(data).length === 0) {
-        alert('No GitHub data found in storage.');
-        return;
-      }
-      
-      let message = '📊 Stored GitHub Data:\n\n';
-      
-      Object.entries(data).forEach(([username, userData]) => {
-        message += `👤 ${username}\n`;
-        message += `   Name: ${userData.profile?.name || 'N/A'}\n`;
-        message += `   Bio: ${userData.profile?.bio || 'N/A'}\n`;
-        message += `   Location: ${userData.profile?.location || 'N/A'}\n`;
-        message += `   Company: ${userData.profile?.company || 'N/A'}\n`;
-        message += `   Followers: ${userData.profile?.followers || '0'}\n`;
-        message += `   Following: ${userData.profile?.following || '0'}\n`;
-        message += `   Repositories: ${userData.repositories?.length || 0}\n`;
-        message += `   Scraped: ${new Date(userData.scrapedAt).toLocaleString()}\n\n`;
-        
-        if (userData.repositories && userData.repositories.length > 0) {
-          message += '   📁 Top Repositories:\n';
-          userData.repositories.slice(0, 3).forEach((repo, index) => {
-            message += `      ${index + 1}. ${repo.name}\n`;
-            message += `         ${repo.description || 'No description'}\n`;
-            message += `         Language: ${repo.language || 'N/A'}\n`;
-            message += `         Stars: ${repo.stars || '0'}\n\n`;
-          });
-        }
-        message += '─'.repeat(50) + '\n\n';
-      });
-      
-      alert(message);
+      // Open the standalone data viewer page in a new tab
+      const dataViewerUrl = chrome.runtime.getURL('data-viewer-standalone.html');
+      await chrome.tabs.create({ url: dataViewerUrl });
     } catch (error) {
-      console.error('Error viewing stored data:', error);
-      alert('Error retrieving stored data: ' + error.message);
+      console.error('Error opening data viewer:', error);
+      alert('Error opening data viewer: ' + error.message);
     }
   };
 
