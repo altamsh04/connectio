@@ -43,7 +43,7 @@ const getExtensionFileType = (browser) => {
   return 'zip';
 };
 
-module.exports = {
+const config = {
   devtool: false, // https://github.com/webpack/webpack/issues/1194#issuecomment-560382342
 
   stats: {
@@ -54,15 +54,17 @@ module.exports = {
   },
 
   mode: nodeEnv,
-
+  
   entry: {
-    manifest: path.join(sourcePath, 'manifest.json'),
-    contentScript: path.join(sourcePath, 'ContentScript', 'index.js'),
-    popup: path.join(sourcePath, 'Popup', 'index.jsx'),
-    options: path.join(sourcePath, 'Options', 'index.jsx'),
-    dataViewer: path.join(sourcePath, 'DataViewer', 'index.jsx'),
-    dataViewerStandalone: path.join(sourcePath, 'DataViewer', 'standalone.js'),
-  },
+  manifest: path.join(sourcePath, 'manifest.json'),
+  contentScript: path.join(sourcePath, 'ContentScript', 'index.js'),
+  popup: path.join(sourcePath, 'Popup', 'index.jsx'),
+  options: path.join(sourcePath, 'Options', 'index.jsx'),
+  dataViewer: path.join(sourcePath, 'DataViewer', 'index.jsx'),
+  dataViewerStandalone: path.join(sourcePath, 'DataViewer', 'standalone.js'),
+  background: path.join(sourcePath, 'Background', 'background.js'),
+},
+
 
   output: {
     path: path.join(destPath, targetBrowser),
@@ -179,7 +181,7 @@ module.exports = {
     new CopyWebpackPlugin({
       patterns: [
         {from: 'source/assets', to: 'assets'},
-        {from: 'source/data', to: 'data'}
+        {from: 'source/data', to: 'data'},
       ],
     }),
     // plugin to enable browser reloading in development mode
@@ -227,3 +229,10 @@ module.exports = {
     ],
   },
 };
+
+// Set target to 'webworker' only for background entry
+if (process.env.npm_lifecycle_event && process.env.npm_lifecycle_event.includes('background')) {
+  config.target = 'webworker';
+}
+
+module.exports = config;

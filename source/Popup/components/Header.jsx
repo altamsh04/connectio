@@ -1,6 +1,6 @@
 import React from 'react';
-import { Zap, Link, Database, TestTube } from 'lucide-react';
-import { testBackgroundScript } from '../handlers/githubHandler';
+import { Database } from 'lucide-react';
+import { testBackgroundScript } from '../handlers/mainHandler';
 
 const Header = () => {
   const handleViewStoredData = async () => {

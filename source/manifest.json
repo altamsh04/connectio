@@ -28,28 +28,20 @@
     "notifications",
     "activeTab",
     "scripting",
+    "cookies",
     "tabs"
   ],
   "host_permissions": [
     "https://api.twitter.com/*",
     "https://twitter.com/*",
     "https://x.com/*",
-    "https://github.com/*"
+    "https://github.com/*",
+    "*://*.zomato.com/*"
   ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  },
   "background": {
     "service_worker": "js/background.bundle.js"
-  },
-
-  "content_scripts": [
-    {
-      "matches": ["https://twitter.com/*", "https://x.com/*"],
-      "js": ["js/contentScript.bundle.js"]
-    }
-  ],
-  "web_accessible_resources": [
-    {
-      "resources": ["data/*"],
-      "matches": ["<all_urls>"]
-    }
-  ]
+  }
 }

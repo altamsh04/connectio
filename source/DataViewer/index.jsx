@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getAllStoredGitHubData, clearAllGitHubData, forceUpdateUserData } from '../Popup/handlers/githubHandler';
+import { getAllStoredGitHubData, clearAllGitHubData, forceUpdateUserData } from '../Popup/handlers/mainHandler';
 
 const DataViewer = () => {
   const [data, setData] = useState(null);
@@ -74,54 +74,6 @@ const DataViewer = () => {
     const appData = appInfo.data;
     const hasData = Object.keys(appData).length > 0;
 
-    // Special handling for GitHub to show user info
-    const renderGitHubInfo = () => {
-      if (appId === 'github' && hasData) {
-        const usernames = Object.keys(appData);
-        if (usernames.length > 0) {
-          const username = usernames[0];
-          const userData = appData[username];
-          
-          // Calculate public repository count
-          let publicRepoCount = 0;
-          if (userData.repositories && userData.repositories.length > 0) {
-            publicRepoCount = userData.repositories.filter(repo => !repo.private).length;
-          }
-
-          return (
-            <div style={{ background: 'white', padding: '15px', borderRadius: '6px', margin: '15px 0', border: '1px solid #e9ecef' }}>
-              <h4 style={{ margin: '0 0 10px 0', color: '#333' }}>Current User: @{username}</h4>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '10px' }}>
-                <div>
-                  <strong>Name:</strong> {userData.profile?.fullName || 'N/A'}
-                </div>
-                <div>
-                  <strong>Bio:</strong> {userData.profile?.bio || 'N/A'}
-                </div>
-                <div>
-                  <strong>Location:</strong> {userData.profile?.location || 'N/A'}
-                </div>
-                <div>
-                  <strong>Company:</strong> {userData.profile?.company || 'N/A'}
-                </div>
-                <div>
-                  <strong>Followers:</strong> {userData.stats?.followers || 'N/A'}
-                </div>
-                <div>
-                  <strong>Following:</strong> {userData.stats?.following || 'N/A'}
-                </div>
-                <div>
-                  <strong>Repositories:</strong> {publicRepoCount}
-                </div>
-              </div>
-              {renderRepoInfo()}
-            </div>
-          );
-        }
-      }
-      return null;
-    };
-
     return (
       <div key={appId} className="user-card">
         <div className="user-header">
@@ -141,24 +93,7 @@ const DataViewer = () => {
             </p>
           </div>
         </div>
-
-        <div className="user-stats">
-          <div className="stat-item">
-            <span className="stat-value">{hasData ? 'Yes' : 'No'}</span>
-            <span className="stat-label">Has Data</span>
-          </div>
-          <div className="stat-item">
-            <span className="stat-value">{Object.keys(appData).length}</span>
-            <span className="stat-label">Data Keys</span>
-          </div>
-          <div className="stat-item">
-            <span className="stat-value">{app.comingSoon ? 'N/A' : 'Active'}</span>
-            <span className="stat-label">Status</span>
-          </div>
-        </div>
-
-        {renderGitHubInfo()}
-
+        
         {hasData && (
           <div style={{ 
             display: 'flex', 

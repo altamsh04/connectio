@@ -1,6 +1,5 @@
 // Standalone Data Viewer - No React dependencies
-// Import the forceUpdateUserData function from githubHandler
-import { forceUpdateUserData } from '../Popup/handlers/githubHandler.js';
+import { forceUpdateUserData } from '../Popup/handlers/mainHandler.js';
 
 class DataViewer {
   constructor() {
@@ -18,18 +17,18 @@ class DataViewer {
 
   async loadData() {
     try {
-      // Load apps data
       const appsUrl = chrome.runtime.getURL('data/apps.json');
       const appsResponse = await fetch(appsUrl);
       const appsData = await appsResponse.json();
-      this.apps = appsData.apps;
-      
-      // Load all data from Chrome storage
+
+      // Sort apps: Available first, Coming Soon later
+      this.apps = appsData.apps.sort((a, b) => {
+        return (a.comingSoon === b.comingSoon) ? 0 : a.comingSoon ? 1 : -1;
+      });
+
       const allStorageData = await chrome.storage.local.get(null);
-      
-      // Organize data by app
+
       this.data = {};
-      
       this.apps.forEach(app => {
         const appData = allStorageData[app.id] || {};
         this.data[app.id] = {
@@ -37,7 +36,7 @@ class DataViewer {
           data: appData
         };
       });
-      
+
     } catch (error) {
       console.error('Error loading data:', error);
       this.showError('Failed to load data: ' + error.message);
@@ -77,66 +76,20 @@ class DataViewer {
     }
   }
 
-  formatDate(dateString) {
-    try {
-      return new Date(dateString).toLocaleString();
-    } catch {
-      return 'Unknown';
-    }
-  }
-
   renderAppCard(appId, appInfo) {
     const app = appInfo.app;
     const appData = appInfo.data;
-    const hasData = Object.keys(appData).length > 0;
-
-    // Special handling for GitHub to show user info
-    let userInfo = '';
-    if (appId === 'github' && hasData) {
-      const usernames = Object.keys(appData);
-      if (usernames.length > 0) {
-        const username = usernames[0];
-        const userData = appData[username];
-        
-        // Calculate public repository count
-        let publicRepoCount = 0;
-        if (userData.repositories && userData.repositories.length > 0) {
-          publicRepoCount = userData.repositories.filter(repo => !repo.private).length;
-        }
-        
-        userInfo = `
-          <div style="background: white; padding: 15px; border-radius: 6px; margin: 15px 0; border: 1px solid #e9ecef;">
-            <h4 style="margin: 0 0 10px 0; color: #333;">Current User: @${username}</h4>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
-              <div>
-                <strong>Name:</strong> ${userData.profile?.fullName || 'N/A'}
-              </div>
-              <div>
-                <strong>Bio:</strong> ${userData.profile?.bio || 'N/A'}
-              </div>
-              <div>
-                <strong>Location:</strong> ${userData.profile?.location || 'N/A'}
-              </div>
-              <div>
-                <strong>Company:</strong> ${userData.profile?.company || 'N/A'}
-              </div>
-              <div>
-                <strong>Followers:</strong> ${userData.stats?.followers || 'N/A'}
-              </div>
-              <div>
-                <strong>Following:</strong> ${userData.stats?.following || 'N/A'}
-              </div>
-              <div>
-                <strong>Repositories:</strong> ${publicRepoCount}
-              </div>
-            </div>
-          </div>
-        `;
-      }
-    }
 
     return `
-      <div class="user-card">
+      <div class="user-card" data-app-id="${appId}">
+        <button 
+          class="toggle-json-btn"
+          data-target-id="json-container-${appId}"
+          aria-label="Toggle JSON"
+        >
+          ⬇
+        </button>
+
         <div class="user-header">
           <img 
             src="${app.logo}" 
@@ -147,58 +100,50 @@ class DataViewer {
           <div class="user-info">
             <h3>${app.name}</h3>
             <p>${app.description}</p>
-            <p style="font-size: 0.8rem; color: ${app.comingSoon ? '#ff6b6b' : '#28a745'}">
+            <p class="status-text" style="color: ${app.comingSoon ? '#ff6b6b' : '#28a745'}">
               ${app.comingSoon ? '🚧 Coming Soon' : '✅ Available'}
             </p>
           </div>
         </div>
 
-        <div class="user-stats">
-          <div class="stat-item">
-            <span class="stat-value">${hasData ? 'Yes' : 'No'}</span>
-            <span class="stat-label">Has Data</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-value">${Object.keys(appData).length}</span>
-            <span class="stat-label">Data Keys</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-value">${app.comingSoon ? 'N/A' : 'Active'}</span>
-            <span class="stat-label">Status</span>
-          </div>
-        </div>
-
-        ${userInfo}
-
-        <div class="json-viewer">
-          <h4>Raw JSON Data for ${app.name}</h4>
+        <div id="json-container-${appId}" class="json-viewer hidden">
+          <h4>Raw JSON Data</h4>
           <pre>${JSON.stringify(appData, null, 2)}</pre>
         </div>
       </div>
     `;
   }
 
+  bindJsonToggleEvents() {
+    const buttons = document.querySelectorAll('.toggle-json-btn');
+    buttons.forEach(button => {
+      button.addEventListener('click', () => {
+        const targetId = button.getAttribute('data-target-id');
+        const container = document.getElementById(targetId);
+        if (container) {
+          container.classList.toggle('hidden');
+          const isHidden = container.classList.contains('hidden');
+          button.textContent = isHidden ? '⬇' : '⬆';
+        }
+      });
+    });
+  }
+
   async handleUpdateAppData(appId) {
     if (confirm(`Are you sure you want to refresh data for ${this.apps.find(app => app.id === appId)?.name || appId}?`)) {
       try {
-        // For now, only GitHub has update functionality
         if (appId === 'github') {
-          // Get the current GitHub username from stored data
           const githubData = this.data.github?.data || {};
           const usernames = Object.keys(githubData);
-          
           if (usernames.length === 0) {
             alert('No GitHub user data found to update. Please connect to GitHub first.');
             return;
           }
-          
-          const username = usernames[0]; // Get the current user
-          
-          // Call forceUpdateUserData with the current username
+
+          const username = usernames[0];
           const result = await forceUpdateUserData(username);
-          
+
           if (result.success) {
-            // Reload the data to show the updated information
             await this.loadData();
             this.render();
             alert(result.message);
@@ -217,11 +162,8 @@ class DataViewer {
   async handleClearAllData() {
     if (confirm('Are you sure you want to clear all app data? This action cannot be undone.')) {
       try {
-        // Clear all app data from storage
         const appIds = this.apps.map(app => app.id);
         await chrome.storage.local.remove(appIds);
-        
-        // Reload data to reflect changes
         await this.loadData();
         this.render();
         alert('All app data cleared successfully!');
@@ -232,8 +174,8 @@ class DataViewer {
   }
 
   render() {
-    if (!this.data || Object.keys(this.data).length === 0) {
-      const container = document.getElementById('data-container');
+    const container = document.getElementById('data-container');
+    if (!this.data || Object.keys(this.data).length === 0 || !container) {
       if (container) {
         container.innerHTML = `
           <div class="no-data">
@@ -245,75 +187,107 @@ class DataViewer {
       return;
     }
 
-    // Filter apps based on selection
     const filteredData = this.selectedApp === 'all' 
       ? this.data 
       : { [this.selectedApp]: this.data[this.selectedApp] };
 
-    const container = document.getElementById('data-container');
-    if (container) {
-      container.innerHTML = `
-        <div style="
-          display: flex; 
-          justify-content: space-between; 
-          align-items: center; 
-          margin-bottom: 20px;
-          padding: 15px;
-          background: #f8f9fa;
+    container.innerHTML = `
+      <style>
+        .hidden {
+          display: none;
+        }
+
+        .user-card {
+          position: relative;
+          background: #ffffff;
+          border: 1px solid #dee2e6;
           border-radius: 8px;
-          border: 1px solid #e9ecef;
-        ">
-          <div>
-            <h3 style="margin: 0; color: #333;">
-              ${this.selectedApp === 'all' ? 'All Apps' : this.apps.find(app => app.id === this.selectedApp)?.name || this.selectedApp}
-            </h3>
-            <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9rem;">
-              Showing data from Chrome storage for ${Object.keys(filteredData).length} app${Object.keys(filteredData).length !== 1 ? 's' : ''}
-            </p>
-          </div>
-          <div style="display: flex; gap: 10px; align-items: center;">
-            <select 
-              onchange="dataViewer.selectedApp = this.value; dataViewer.render();"
-              style="
-                padding: 8px 12px;
-                border-radius: 6px;
-                border: 1px solid #ddd;
-                font-size: 0.9rem;
-                background: white;
-              "
-            >
-              <option value="all" ${this.selectedApp === 'all' ? 'selected' : ''}>All Apps</option>
-              ${this.apps.map(app => `
-                <option value="${app.id}" ${this.selectedApp === app.id ? 'selected' : ''}>
-                  ${app.name} ${app.comingSoon ? '(Coming Soon)' : ''}
-                </option>
-              `).join('')}
-            </select>
-            <button 
-              onclick="dataViewer.handleClearAllData()"
-              style="
-                background: #dc3545;
-                color: white;
-                border: none;
-                padding: 8px 16px;
-                border-radius: 6px;
-                cursor: pointer;
-                font-size: 0.9rem;
-                transition: background 0.2s;
-              "
-              onmouseover="this.style.background='#c82333'"
-              onmouseout="this.style.background='#dc3545'"
-            >
-              Clear All Data
-            </button>
-          </div>
+          padding: 16px 20px;
+          margin-bottom: 20px;
+          box-shadow: 0 2px 5px rgba(0,0,0,0.04);
+        }
+
+        .toggle-json-btn {
+          position: absolute;
+          top: 12px;
+          right: 12px;
+          background: none;
+          border: none;
+          font-size: 1.4rem;
+          cursor: pointer;
+          transition: transform 0.2s ease;
+          color: #007bff;
+        }
+
+        .toggle-json-btn:hover {
+          transform: scale(1.1);
+        }
+
+        .user-header {
+          display: flex;
+          align-items: center;
+          gap: 15px;
+        }
+
+        .user-avatar {
+          width: 48px;
+          height: 48px;
+          border-radius: 6px;
+          object-fit: contain;
+          border: 1px solid #ccc;
+        }
+
+        .user-info h3 {
+          margin: 0;
+          font-size: 1.1rem;
+        }
+
+        .user-info p {
+          margin: 4px 0;
+          font-size: 0.9rem;
+          color: #555;
+        }
+
+        .status-text {
+          font-size: 0.8rem;
+        }
+
+        .json-viewer {
+          margin-top: 15px;
+          padding: 10px;
+          background: #f1f3f5;
+          border-radius: 6px;
+          font-size: 0.85rem;
+          overflow-x: auto;
+        }
+      </style>
+
+      <div style="
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        margin-bottom: 20px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border: 1px solid #e9ecef;
+      ">
+        <div>
+          <h3 style="margin: 0; color: #333;">
+            ${this.selectedApp === 'all' ? 'All Apps' : this.apps.find(app => app.id === this.selectedApp)?.name || this.selectedApp}
+          </h3>
+          <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9rem;">
+            Showing data from Chrome storage for ${Object.keys(filteredData).length} app${Object.keys(filteredData).length !== 1 ? 's' : ''}
+          </p>
         </div>
-        
-        ${Object.entries(filteredData).map(([appId, appInfo]) => 
-          this.renderAppCard(appId, appInfo)
-        ).join('')}
-      `;
-    }
+      </div>
+
+      ${Object.entries(filteredData).map(([appId, appInfo]) => 
+        this.renderAppCard(appId, appInfo)
+      ).join('')}
+    `;
+
+    this.bindJsonToggleEvents();
   }
 }
 
@@ -326,4 +300,4 @@ document.addEventListener('DOMContentLoaded', () => {
 // Export for use in other contexts
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = DataViewer;
-} 
+}
