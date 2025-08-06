@@ -1,5 +1,6 @@
 // handlers/mainHandler.js
 import { fetchZomatoOrders } from '../ZomatoOrders';
+import { fetchSwiggyOrders } from '../SwiggyOrders';
 import { fetchGithubProfiles } from '../GithubProfiles';
 
 // Function to save connected apps to chrome storage
@@ -59,6 +60,27 @@ export const handleToggleApp = async (appId, connectedApps, setConnectedApps, se
         setTimeout(() => {
           resolve();
         }, 10000); // 10 second timeout
+      });
+      
+      toggleAppInSet();
+      setLoadingMessage && setLoadingMessage('');
+      return;
+    }
+
+    if (appId === 'swiggy') {
+      setLoadingMessage && setLoadingMessage('Fetching Swiggy orders...');
+      
+      await new Promise((resolve, reject) => {
+        fetchSwiggyOrders((loading) => {
+          if (!loading) { // loading finished
+            resolve();
+          }
+        });
+        
+        // Add timeout to prevent hanging
+        setTimeout(() => {
+          resolve();
+        }, 15000); // 15 second timeout (longer for Swiggy due to pagination)
       });
       
       toggleAppInSet();

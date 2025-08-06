@@ -103,7 +103,7 @@
         "name": "Swiggy",
         "description": "Food delivery and restaurant discovery platform",
         "logo": "https://res.cloudinary.com/dhbuw3k2w/image/upload/v1754454259/ConnectIO/swiggy-logo-png_seeklogo-340348_d57qil.png",
-        "comingSoon": true
+        "comingSoon": false
       },
       {
         "id": "disney-plus",
