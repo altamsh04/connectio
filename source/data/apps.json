@@ -1,0 +1,165 @@
+{
+    "apps": [
+      {
+        "id": "github",
+        "name": "GitHub",
+        "description": "Code hosting platform for version control and collaboration",
+        "logo": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
+        "comingSoon": false
+      },
+      {
+        "id": "cursor",
+        "name": "Cursor",
+        "description": "AI-first code editor built for the modern developer",
+        "logo": "https://res.cloudinary.com/dhbuw3k2w/image/upload/v1754452929/ConnectIO/cursor_go2yhq.png",
+        "comingSoon": true
+      },
+      {
+        "id": "spotify",
+        "name": "Spotify",
+        "description": "Music streaming platform with millions of songs",
+        "logo": "https://res.cloudinary.com/dhbuw3k2w/image/upload/v1754453611/ConnectIO/spotify_cnl5hz.png",
+        "comingSoon": true
+      },
+      {
+        "id": "uber",
+        "name": "Uber",
+        "description": "Ride-hailing and food delivery service",
+        "logo": "https://res.cloudinary.com/dhbuw3k2w/image/upload/v1754452822/ConnectIO/uber_jgwhbp.png",
+        "comingSoon": true
+      },
+      {
+        "id": "reddit",
+        "name": "Reddit",
+        "description": "Social news aggregation and discussion website",
+        "logo": "https://res.cloudinary.com/dhbuw3k2w/image/upload/v1754453610/ConnectIO/reddit_pb2kvf.png",
+        "comingSoon": true
+      },
+      {
+        "id": "twitter",
+        "name": "X (Twitter)",
+        "description": "Social media platform for real-time conversations",
+        "logo": "https://about.twitter.com/content/dam/about-twitter/x/brand-toolkit/logo-black.png.twimg.1920.png",
+        "comingSoon": true
+      },
+      {
+        "id": "instagram",
+        "name": "Instagram",
+        "description": "Photo and video sharing social networking service",
+        "logo": "https://www.instagram.com/static/images/ico/favicon-200.png/ab6eff595bb1.png",
+        "comingSoon": true
+      },
+      {
+        "id": "chatgpt",
+        "name": "ChatGPT",
+        "description": "AI-powered conversational chatbot by OpenAI",
+        "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/ChatGPT_logo.svg/1200px-ChatGPT_logo.svg.png",
+        "comingSoon": true
+      },
+      {
+        "id": "grab",
+        "name": "Grab",
+        "description": "Southeast Asian ride-hailing and delivery platform",
+        "logo": "https://res.cloudinary.com/dhbuw3k2w/image/upload/v1754453614/ConnectIO/grab-seeklogo_htpfiu.png",
+        "comingSoon": true
+      },
+      {
+        "id": "careem",
+        "name": "Careem",
+        "description": "Ride-hailing service in the Middle East and South Asia",
+        "logo": "https://res.cloudinary.com/dhbuw3k2w/image/upload/v1754453796/ConnectIO/Screenshot_from_2025-08-06_09-46-15_mjkpvt.png",
+        "comingSoon": true
+      },
+      {
+        "id": "tiktok",
+        "name": "TikTok",
+        "description": "Short-form video hosting service",
+        "logo": "https://res.cloudinary.com/dhbuw3k2w/image/upload/v1754453960/ConnectIO/tik-tok_xbf48r.png",
+        "comingSoon": true
+      },
+      {
+        "id": "netflix",
+        "name": "Netflix",
+        "description": "Streaming service for movies and TV shows",
+        "logo": "https://res.cloudinary.com/dhbuw3k2w/image/upload/v1754453959/ConnectIO/netflix_ewembp.png",
+        "comingSoon": true
+      },
+      {
+        "id": "threads",
+        "name": "Threads",
+        "description": "Text-based social media platform by Meta",
+        "logo": "https://res.cloudinary.com/dhbuw3k2w/image/upload/v1754453959/ConnectIO/threads_g1ih3f.png",
+        "comingSoon": true
+      },
+      {
+        "id": "temu",
+        "name": "Temu",
+        "description": "Online marketplace for affordable products",
+        "logo": "https://res.cloudinary.com/dhbuw3k2w/image/upload/v1754453958/ConnectIO/Temu_logo_icon.svg_m4uhed.png",
+        "comingSoon": true
+      },
+      {
+        "id": "swiggy",
+        "name": "Swiggy",
+        "description": "Food delivery and restaurant discovery platform",
+        "logo": "https://res.cloudinary.com/dhbuw3k2w/image/upload/v1754454259/ConnectIO/swiggy-logo-png_seeklogo-340348_d57qil.png",
+        "comingSoon": true
+      },
+      {
+        "id": "disney-plus",
+        "name": "Disney+",
+        "description": "Streaming service for Disney, Pixar, Marvel, and Star Wars content",
+        "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Disney%2B_logo.svg/2560px-Disney%2B_logo.svg.png",
+        "comingSoon": true
+      },
+      {
+        "id": "pinterest",
+        "name": "Pinterest",
+        "description": "Image sharing and social media service",
+        "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Pinterest-logo.png/1200px-Pinterest-logo.png",
+        "comingSoon": true
+      },
+      {
+        "id": "flipkart",
+        "name": "Flipkart",
+        "description": "E-commerce platform for online shopping",
+        "logo": "https://res.cloudinary.com/dhbuw3k2w/image/upload/v1754454260/ConnectIO/flipkart-logo-png_seeklogo-318406_ya2x4x.png",
+        "comingSoon": true
+      },
+      {
+        "id": "zomato",
+        "name": "Zomato",
+        "description": "Food delivery and restaurant discovery platform",
+        "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/Zomato_logo.png/2560px-Zomato_logo.png",
+        "comingSoon": false
+      },
+      {
+        "id": "talabat",
+        "name": "Talabat",
+        "description": "Food delivery service in the Middle East",
+        "logo": "https://res.cloudinary.com/dhbuw3k2w/image/upload/v1754454410/ConnectIO/talabatlogo-freelogovectors.net__ofp56g.png",
+        "comingSoon": true
+      },
+      {
+        "id": "amazon",
+        "name": "Amazon",
+        "description": "E-commerce and cloud computing company",
+        "logo": "https://res.cloudinary.com/dhbuw3k2w/image/upload/v1754454406/ConnectIO/Amazon-512_iofgb8.webp",
+        "comingSoon": true
+      },
+      {
+        "id": "blinkit",
+        "name": "Blinkit",
+        "description": "Quick commerce platform for instant grocery delivery",
+        "logo": "https://res.cloudinary.com/dhbuw3k2w/image/upload/v1754454258/ConnectIO/blinkit-logo-png_seeklogo-438944_gnhtci.png",
+        "comingSoon": true
+      },
+      {
+        "id": "doordash",
+        "name": "DoorDash",
+        "description": "Food delivery service platform",
+        "logo": "https://res.cloudinary.com/dhbuw3k2w/image/upload/v1754454258/ConnectIO/images_fuvrol.png",
+        "comingSoon": true
+      }
+    ]
+  } 
