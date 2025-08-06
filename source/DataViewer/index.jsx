@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getAllStoredGitHubData, clearAllGitHubData, forceUpdateUserData } from '../Popup/handlers/buttonHandlers';
+import { getAllStoredGitHubData, clearAllGitHubData, forceUpdateUserData } from '../Popup/handlers/githubHandler';
 
 const DataViewer = () => {
   const [data, setData] = useState(null);
@@ -61,27 +61,6 @@ const DataViewer = () => {
     }
   };
 
-  const handleUpdateAppData = async (appId) => {
-    if (window.confirm(`Are you sure you want to refresh data for ${apps.find(app => app.id === appId)?.name || appId}?`)) {
-      try {
-        // For now, only GitHub has update functionality
-        if (appId === 'github') {
-          const result = await forceUpdateUserData('latest'); // This will need to be updated
-          if (result.success) {
-            await loadData();
-            alert(result.message);
-          } else {
-            alert('Error updating data: ' + result.error);
-          }
-        } else {
-          alert('Update functionality not yet implemented for this app.');
-        }
-      } catch (err) {
-        alert('Error updating data: ' + err.message);
-      }
-    }
-  };
-
   const formatDate = (dateString) => {
     try {
       return new Date(dateString).toLocaleString();
@@ -94,6 +73,54 @@ const DataViewer = () => {
     const app = appInfo.app;
     const appData = appInfo.data;
     const hasData = Object.keys(appData).length > 0;
+
+    // Special handling for GitHub to show user info
+    const renderGitHubInfo = () => {
+      if (appId === 'github' && hasData) {
+        const usernames = Object.keys(appData);
+        if (usernames.length > 0) {
+          const username = usernames[0];
+          const userData = appData[username];
+          
+          // Calculate public repository count
+          let publicRepoCount = 0;
+          if (userData.repositories && userData.repositories.length > 0) {
+            publicRepoCount = userData.repositories.filter(repo => !repo.private).length;
+          }
+
+          return (
+            <div style={{ background: 'white', padding: '15px', borderRadius: '6px', margin: '15px 0', border: '1px solid #e9ecef' }}>
+              <h4 style={{ margin: '0 0 10px 0', color: '#333' }}>Current User: @{username}</h4>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '10px' }}>
+                <div>
+                  <strong>Name:</strong> {userData.profile?.fullName || 'N/A'}
+                </div>
+                <div>
+                  <strong>Bio:</strong> {userData.profile?.bio || 'N/A'}
+                </div>
+                <div>
+                  <strong>Location:</strong> {userData.profile?.location || 'N/A'}
+                </div>
+                <div>
+                  <strong>Company:</strong> {userData.profile?.company || 'N/A'}
+                </div>
+                <div>
+                  <strong>Followers:</strong> {userData.stats?.followers || 'N/A'}
+                </div>
+                <div>
+                  <strong>Following:</strong> {userData.stats?.following || 'N/A'}
+                </div>
+                <div>
+                  <strong>Repositories:</strong> {publicRepoCount}
+                </div>
+              </div>
+              {renderRepoInfo()}
+            </div>
+          );
+        }
+      }
+      return null;
+    };
 
     return (
       <div key={appId} className="user-card">
@@ -129,6 +156,8 @@ const DataViewer = () => {
             <span className="stat-label">Status</span>
           </div>
         </div>
+
+        {renderGitHubInfo()}
 
         {hasData && (
           <div style={{ 

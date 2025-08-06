@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import AppsGrid from './components/AppsGrid';
 import Header from './components/Header';
 import { Loader2, AlertCircle, RefreshCw } from 'lucide-react';
-import { handleToggleApp, loadConnectedApps } from './handlers/buttonHandlers';
+import { handleToggleApp, loadConnectedApps } from './handlers/githubHandler';
 import './tailwind.css';
 
 function App() {

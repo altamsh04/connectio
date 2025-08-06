@@ -1,7 +1,7 @@
 // Export functions for data viewer functionality
 // This can be used in other parts of the extension or external scripts
 
-import { getAllStoredGitHubData, clearAllGitHubData, forceUpdateUserData } from '../Popup/handlers/buttonHandlers';
+import { getAllStoredGitHubData, clearAllGitHubData, forceUpdateUserData } from '../Popup/handlers/githubHandler';
 
 // Function to get all app data from Chrome storage
 export const getAllAppData = async () => {

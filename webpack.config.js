@@ -62,7 +62,6 @@ module.exports = {
     options: path.join(sourcePath, 'Options', 'index.jsx'),
     dataViewer: path.join(sourcePath, 'DataViewer', 'index.jsx'),
     dataViewerStandalone: path.join(sourcePath, 'DataViewer', 'standalone.js'),
-    background: path.join(sourcePath, 'background.js'),
   },
 
   output: {

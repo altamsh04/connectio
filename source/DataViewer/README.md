@@ -54,9 +54,14 @@ const viewer = new DataViewer();
 ✅ **Chrome Storage Integration** - Fetches data from extension storage  
 ✅ **App Filtering** - Filter by specific app or view all  
 ✅ **Data Management** - Clear individual or all app data  
+✅ **Data Updates** - Update GitHub data with fresh scraping  
+✅ **Enhanced GitHub Scraping** - Comprehensive repository data collection  
+✅ **Public Repository Count** - Shows count of public repositories only  
+✅ **Repository Details** - Name, status, description, language, license, stars, forks  
 ✅ **Raw JSON Display** - Shows complete JSON data for each app  
 ✅ **Responsive Design** - Works on different screen sizes  
 ✅ **Error Handling** - Graceful error handling and user feedback  
+✅ **GitHub Single-Entity Storage** - Only stores the most recent GitHub user's data  
 
 ## Data Structure
 
@@ -65,8 +70,42 @@ The data viewer expects data to be stored in Chrome storage with the following s
 ```javascript
 {
   "github": {
-    "username1": { /* GitHub user data */ },
-    "username2": { /* GitHub user data */ }
+    "current_username": { 
+      "profile": { 
+        "fullName": "User Full Name",
+        "username": "username",
+        "bio": "User bio",
+        "location": "User location",
+        "company": "User company",
+        "avatarUrl": "https://avatars.githubusercontent.com/...",
+        "profileUrl": "https://github.com/username"
+      },
+      "stats": { 
+        "repositories": 10,
+        "followers": "100",
+        "following": "50"
+      },
+      "repositories": [
+        {
+          "name": "repository-name",
+          "url": "https://github.com/username/repository-name",
+          "status": "public", // or "private"
+          "description": "Repository description",
+          "language": "JavaScript",
+          "license": "MIT",
+          "lastUpdated": "2025-08-06T06:13:49Z",
+          "topics": ["topic1", "topic2"],
+          "forkCount": 5,
+          "starCount": 10
+        }
+      ],
+      "repositoryStats": {
+        "total": 10,
+        "public": 8,
+        "private": 2
+      },
+      "scrapedAt": "2025-08-06T05:50:46.974Z"
+    }
   },
   "spotify": {
     "playlists": [ /* Spotify data */ ],
@@ -79,6 +118,8 @@ The data viewer expects data to be stored in Chrome storage with the following s
   // ... other apps
 }
 ```
+
+**Note**: GitHub data is stored as a single entity - only the most recently scraped user's data is kept. When a new GitHub user is scraped, it replaces the previous user's data. The scraping process now includes comprehensive repository information from all pages.
 
 ## Building
 

@@ -1,4 +1,7 @@
 // Standalone Data Viewer - No React dependencies
+// Import the forceUpdateUserData function from githubHandler
+import { forceUpdateUserData } from '../Popup/handlers/githubHandler.js';
+
 class DataViewer {
   constructor() {
     this.data = null;
@@ -94,6 +97,13 @@ class DataViewer {
       if (usernames.length > 0) {
         const username = usernames[0];
         const userData = appData[username];
+        
+        // Calculate public repository count
+        let publicRepoCount = 0;
+        if (userData.repositories && userData.repositories.length > 0) {
+          publicRepoCount = userData.repositories.filter(repo => !repo.private).length;
+        }
+        
         userInfo = `
           <div style="background: white; padding: 15px; border-radius: 6px; margin: 15px 0; border: 1px solid #e9ecef;">
             <h4 style="margin: 0 0 10px 0; color: #333;">Current User: @${username}</h4>
@@ -117,10 +127,7 @@ class DataViewer {
                 <strong>Following:</strong> ${userData.stats?.following || 'N/A'}
               </div>
               <div>
-                <strong>Repositories:</strong> ${userData.stats?.repositories || 'N/A'}
-              </div>
-              <div>
-                <strong>Scraped:</strong> ${this.formatDate(userData.scrapedAt)}
+                <strong>Repositories:</strong> ${publicRepoCount}
               </div>
             </div>
           </div>
@@ -163,28 +170,6 @@ class DataViewer {
 
         ${userInfo}
 
-        ${hasData ? `
-          <div style="display: flex; gap: 10px; margin-top: 15px; justify-content: flex-end;">
-            <button 
-              onclick="dataViewer.handleUpdateAppData('${appId}')"
-              style="
-                background: #28a745;
-                color: white;
-                border: none;
-                padding: 8px 16px;
-                border-radius: 6px;
-                cursor: pointer;
-                font-size: 0.9rem;
-                transition: background 0.2s;
-              "
-              onmouseover="this.style.background='#218838'"
-              onmouseout="this.style.background='#28a745'"
-            >
-              🔄 Update Data
-            </button>
-          </div>
-        ` : ''}
-
         <div class="json-viewer">
           <h4>Raw JSON Data for ${app.name}</h4>
           <pre>${JSON.stringify(appData, null, 2)}</pre>
@@ -198,7 +183,28 @@ class DataViewer {
       try {
         // For now, only GitHub has update functionality
         if (appId === 'github') {
-          alert('Update functionality not yet implemented in standalone version.');
+          // Get the current GitHub username from stored data
+          const githubData = this.data.github?.data || {};
+          const usernames = Object.keys(githubData);
+          
+          if (usernames.length === 0) {
+            alert('No GitHub user data found to update. Please connect to GitHub first.');
+            return;
+          }
+          
+          const username = usernames[0]; // Get the current user
+          
+          // Call forceUpdateUserData with the current username
+          const result = await forceUpdateUserData(username);
+          
+          if (result.success) {
+            // Reload the data to show the updated information
+            await this.loadData();
+            this.render();
+            alert(result.message);
+          } else {
+            alert('Error updating data: ' + result.error);
+          }
         } else {
           alert('Update functionality not yet implemented for this app.');
         }
