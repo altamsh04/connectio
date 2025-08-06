@@ -30,34 +30,64 @@ export const fetchZomatoOrders = (setLoading) => {
 
         const rawData = await response.json();
 
-        // 🔒 Clone and sanitize the response
-        const sanitizedData = JSON.parse(JSON.stringify(rawData)); // deep clone
-
-        const orders = sanitizedData?.orders?.entities?.ORDER;
-        if (orders) {
-          Object.values(orders).forEach((order) => {
-            // Remove sensitive fields
-            if (order.deliveryDetails) {
-              delete order.deliveryDetails.deliveryAddress;
+        // 🔥 NUCLEAR SANITIZATION - Remove ALL sensitive data
+        const nukeAllSensitiveData = (obj) => {
+          if (obj === null || obj === undefined) return obj;
+          
+          if (Array.isArray(obj)) {
+            return obj.map(item => nukeAllSensitiveData(item));
+          }
+          
+          if (typeof obj === 'object') {
+            const cleaned = {};
+            
+            for (const [key, value] of Object.entries(obj)) {
+              // 🚫 BLACKLISTED KEYS - DELETE COMPLETELY
+              if (key === 'deliveryAddress' || 
+                  key === 'orderId' || 
+                  key === 'hashId' || 
+                  key === 'directionUrl' || 
+                  key === 'addressString') {
+                console.log(`🔥 NUKED: ${key}`);
+                continue; // Skip this key entirely
+              }
+              
+              // 🧹 Clean nested objects/arrays recursively
+              cleaned[key] = nukeAllSensitiveData(value);
             }
-            delete order.orderId;
-            delete order.hashId;
+            
+            return cleaned;
+          }
+          
+          return obj;
+        };
 
-            if (order.resInfo?.locality) {
-              delete order.resInfo.locality.directionUrl;
-              delete order.resInfo.locality.addressString;
-            }
-          });
-        }
+        // Apply nuclear sanitization
+        console.log('🔥 STARTING NUCLEAR SANITIZATION...');
+        const sanitizedData = nukeAllSensitiveData(rawData);
+        console.log('✅ NUCLEAR SANITIZATION COMPLETE');
 
-        // Save sanitized data to chrome.storage
+        // 🔍 VERIFICATION - Check if any sensitive data survived
+        const dataString = JSON.stringify(sanitizedData);
+        const sensitiveTerms = ['deliveryAddress', 'orderId', 'hashId', 'directionUrl', 'addressString'];
+        
+        console.log('🔍 VERIFICATION RESULTS:');
+        sensitiveTerms.forEach(term => {
+          const found = dataString.includes(`"${term}"`);
+          console.log(`  ${found ? '❌ FOUND' : '✅ CLEAN'}: ${term}`);
+        });
+
+        // Save completely sanitized data
         chrome.storage.local.set({
           zomato: {
             orders: sanitizedData,
-            fetchedAt: new Date().toISOString()
+            fetchedAt: new Date().toISOString(),
+            sanitized: true,
+            sanitizationMethod: 'nuclear'
           }
         }, () => {
-          console.log('✅ Zomato orders saved to chrome.storage.local (sanitized):', sanitizedData);
+          const orderCount = Object.keys(sanitizedData?.orders?.entities?.ORDER || {}).length;
+          console.log(`✅ CLEAN Zomato orders saved: ${orderCount} orders`);
           setLoading && setLoading(false);
           resolve(sanitizedData);
         });
@@ -67,6 +97,63 @@ export const fetchZomatoOrders = (setLoading) => {
         setLoading && setLoading(false);
         reject(err);
       }
+    });
+  });
+};
+
+// Nuclear sanitization for already stored data
+export const nukeSensitiveDataFromStorage = () => {
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.get(['zomato'], (result) => {
+      if (!result.zomato?.orders) {
+        console.log('No stored Zomato data to sanitize');
+        resolve(null);
+        return;
+      }
+
+      console.log('🔥 NUKING STORED DATA...');
+
+      const nukeAllSensitiveData = (obj) => {
+        if (obj === null || obj === undefined) return obj;
+        
+        if (Array.isArray(obj)) {
+          return obj.map(item => nukeAllSensitiveData(item));
+        }
+        
+        if (typeof obj === 'object') {
+          const cleaned = {};
+          
+          for (const [key, value] of Object.entries(obj)) {
+            if (key === 'deliveryAddress' || 
+                key === 'orderId' || 
+                key === 'hashId' || 
+                key === 'directionUrl' || 
+                key === 'addressString') {
+              continue; // NUKE IT
+            }
+            
+            cleaned[key] = nukeAllSensitiveData(value);
+          }
+          
+          return cleaned;
+        }
+        
+        return obj;
+      };
+
+      const cleanData = nukeAllSensitiveData(result.zomato.orders);
+
+      chrome.storage.local.set({
+        zomato: {
+          ...result.zomato,
+          orders: cleanData,
+          sanitized: true,
+          sanitizationMethod: 'nuclear'
+        }
+      }, () => {
+        console.log('✅ STORED DATA NUKED SUCCESSFULLY');
+        resolve(cleanData);
+      });
     });
   });
 };
