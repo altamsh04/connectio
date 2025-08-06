@@ -8,6 +8,13 @@
         "comingSoon": false
       },
       {
+        "id": "zomato",
+        "name": "Zomato",
+        "description": "Food delivery and restaurant discovery platform",
+        "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/Zomato_logo.png/2560px-Zomato_logo.png",
+        "comingSoon": false
+      },
+      {
         "id": "cursor",
         "name": "Cursor",
         "description": "AI-first code editor built for the modern developer",
@@ -125,13 +132,6 @@
         "description": "E-commerce platform for online shopping",
         "logo": "https://res.cloudinary.com/dhbuw3k2w/image/upload/v1754454260/ConnectIO/flipkart-logo-png_seeklogo-318406_ya2x4x.png",
         "comingSoon": true
-      },
-      {
-        "id": "zomato",
-        "name": "Zomato",
-        "description": "Food delivery and restaurant discovery platform",
-        "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/Zomato_logo.png/2560px-Zomato_logo.png",
-        "comingSoon": false
       },
       {
         "id": "talabat",
