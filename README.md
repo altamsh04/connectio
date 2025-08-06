@@ -1,7 +1,7 @@
 # Connect.IO
 
 ## Extension
-<img width="867" height="762" alt="Image" src="https://github.com/user-attachments/assets/1277ad88-ea7f-4635-abf7-887cef9548fc" />
+<img width="350" height="350" alt="Image" src="https://github.com/user-attachments/assets/1277ad88-ea7f-4635-abf7-887cef9548fc" />
 
 ---
 
