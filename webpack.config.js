@@ -22,7 +22,6 @@ const extensionReloaderPlugin =
         port: 9090,
         reloadPage: true,
         entries: {
-          // TODO: reload manifest on update
           contentScript: 'contentScript',
           extensionPage: ['popup', 'options', 'dataViewer', 'dataViewerStandalone'],
         },
@@ -44,32 +43,28 @@ const getExtensionFileType = (browser) => {
 };
 
 const config = {
-  devtool: false, // https://github.com/webpack/webpack/issues/1194#issuecomment-560382342
-
+  devtool: false,
   stats: {
     all: false,
     builtAt: true,
     errors: true,
     hash: true,
   },
-
   mode: nodeEnv,
-  
   entry: {
-  manifest: path.join(sourcePath, 'manifest.json'),
-  contentScript: path.join(sourcePath, 'ContentScript', 'index.js'),
-  popup: path.join(sourcePath, 'Popup', 'index.jsx'),
-  options: path.join(sourcePath, 'Options', 'index.jsx'),
-  dataViewer: path.join(sourcePath, 'DataViewer', 'index.jsx'),
-  dataViewerStandalone: path.join(sourcePath, 'DataViewer', 'standalone.js'),
-  background: path.join(sourcePath, 'Background', 'background.js'),
-},
-
+    manifest: path.join(sourcePath, 'manifest.json'),
+    contentScript: path.join(sourcePath, 'ContentScript', 'index.js'),
+    popup: path.join(sourcePath, 'Popup', 'index.jsx'),
+    options: path.join(sourcePath, 'Options', 'index.jsx'),
+    dataViewer: path.join(sourcePath, 'DataViewer', 'index.jsx'),
+    dataViewerStandalone: path.join(sourcePath, 'DataViewer', 'standalone.js'),
+    background: path.join(sourcePath, 'Background', 'background.js'),
+  },
   output: {
     path: path.join(destPath, targetBrowser),
     filename: 'js/[name].bundle.js',
+    globalObject: 'self',
   },
-
   resolve: {
     extensions: ['.js', '.jsx', '.json'],
     alias: {
@@ -78,21 +73,18 @@ const config = {
       ),
     },
   },
-
-  // Configure node polyfills for service workers
   node: {
     global: false,
   },
-
   module: {
     rules: [
       {
-        type: 'javascript/auto', // prevent webpack handling json with its own loaders,
+        type: 'javascript/auto',
         test: /manifest\.json$/,
         use: {
           loader: 'wext-manifest-loader',
           options: {
-            usePackageJSONVersion: true, // set to false to not use package.json version for manifest
+            usePackageJSONVersion: true,
           },
         },
         exclude: /node_modules/,
@@ -106,10 +98,10 @@ const config = {
         test: /\.(sa|sc|c)ss$/,
         use: [
           {
-            loader: MiniCssExtractPlugin.loader, // It creates a CSS file per JS file which contains CSS
+            loader: MiniCssExtractPlugin.loader,
           },
           {
-            loader: 'css-loader', // Takes the CSS files and returns the CSS with imports and url(...) for Webpack
+            loader: 'css-loader',
             options: {
               sourceMap: true,
             },
@@ -125,21 +117,16 @@ const config = {
               },
             },
           },
-          'resolve-url-loader', // Rewrites relative paths in url() statements
-          'sass-loader', // Takes the Sass/SCSS file and compiles to the CSS
+          'resolve-url-loader',
+          'sass-loader',
         ],
       },
     ],
   },
-
   plugins: [
-    // Plugin to not generate js bundle for manifest entry
     new WextManifestWebpackPlugin(),
-    // Generate sourcemaps
     new webpack.SourceMapDevToolPlugin({filename: false}),
-    // environmental variables
     new webpack.EnvironmentPlugin(['NODE_ENV', 'TARGET_BROWSER']),
-    // delete previous build files
     new CleanWebpackPlugin({
       cleanOnceBeforeBuildPatterns: [
         path.join(process.cwd(), `extension/${targetBrowser}`),
@@ -179,19 +166,15 @@ const config = {
       hash: true,
       filename: 'data-viewer-standalone.html',
     }),
-    // write css file(s) to build folder
     new MiniCssExtractPlugin({filename: 'css/[name].css'}),
-    // copy static assets
     new CopyWebpackPlugin({
       patterns: [
         {from: 'source/assets', to: 'assets'},
         {from: 'source/data', to: 'data'},
       ],
     }),
-    // plugin to enable browser reloading in development mode
     extensionReloaderPlugin,
   ],
-
   optimization: {
     minimize: true,
     minimizer: [
@@ -234,7 +217,38 @@ const config = {
   },
 };
 
-// Set target to 'webworker' for service worker compatibility
-config.target = 'webworker';
+// Configure for service worker compatibility
+if (nodeEnv === 'production') {
+  config.target = 'webworker';
+  config.plugins.push(
+    new webpack.DefinePlugin({
+      'typeof window': '"undefined"',
+      'typeof document': '"undefined"',
+      'typeof navigator': '"undefined"',
+      'typeof location': '"undefined"',
+      'typeof history': '"undefined"',
+      'typeof localStorage': '"undefined"',
+      'typeof sessionStorage': '"undefined"',
+    })
+  );
+} else {
+  // In development, configure background script separately
+  config.module.rules.push({
+    test: /background\.js$/,
+    use: {
+      loader: 'babel-loader',
+      options: {
+        presets: [
+          ['@babel/preset-env', {
+            targets: {
+              browsers: ['chrome >= 88']
+            },
+            modules: false
+          }]
+        ]
+      }
+    }
+  });
+}
 
 module.exports = config;
