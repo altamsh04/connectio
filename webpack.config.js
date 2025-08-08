@@ -65,7 +65,6 @@ const config = {
   background: path.join(sourcePath, 'Background', 'background.js'),
 },
 
-
   output: {
     path: path.join(destPath, targetBrowser),
     filename: 'js/[name].bundle.js',
@@ -78,6 +77,11 @@ const config = {
         path.join(__dirname, 'node_modules', 'webextension-polyfill')
       ),
     },
+  },
+
+  // Configure node polyfills for service workers
+  node: {
+    global: false,
   },
 
   module: {
@@ -230,9 +234,7 @@ const config = {
   },
 };
 
-// Set target to 'webworker' only for background entry
-if (process.env.npm_lifecycle_event && process.env.npm_lifecycle_event.includes('background')) {
-  config.target = 'webworker';
-}
+// Set target to 'webworker' for service worker compatibility
+config.target = 'webworker';
 
 module.exports = config;

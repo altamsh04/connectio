@@ -1,6 +1,5 @@
 import React from 'react';
 import { Database } from 'lucide-react';
-import { testBackgroundScript } from '../handlers/mainHandler';
 
 const Header = () => {
   const handleViewStoredData = async () => {
@@ -11,19 +10,6 @@ const Header = () => {
     } catch (error) {
       console.error('Error opening data viewer:', error);
       alert('Error opening data viewer: ' + error.message);
-    }
-  };
-
-  const handleTestBackground = async () => {
-    try {
-      const result = await testBackgroundScript();
-      if (result.success) {
-        alert('✅ Background script is working! Response: ' + result.message);
-      } else {
-        alert('❌ Background script test failed: ' + result.error);
-      }
-    } catch (error) {
-      alert('❌ Background script test error: ' + error.message);
     }
   };
 
@@ -39,7 +25,7 @@ const Header = () => {
         <button
           onClick={handleViewStoredData}
           className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white text-sm rounded-lg transition-colors border border-white/20"
-          title="View stored GitHub data"
+          title="View stored data"
         >
           <Database size={14} />
           View Data
