@@ -1,12 +1,84 @@
 // Standalone Data Viewer - No React dependencies
-import { forceUpdateUserData } from '../Popup/handlers/mainHandler.js';
+
+// Check if chrome API is available
+const isChromeAPIAvailable = () => {
+  return typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local;
+};
+
+// Simple implementation of forceUpdateUserData for standalone use
+const forceUpdateUserData = async (username) => {
+  try {
+    if (!username) {
+      return { success: false, error: 'Username is required' };
+    }
+
+    // Fetch user profile
+    const profileResponse = await fetch(`https://api.github.com/users/${username}`, {
+      headers: {
+        'Accept': 'application/vnd.github.v3+json',
+        'User-Agent': 'GitHub-Profile-Extension'
+      }
+    });
+
+    if (!profileResponse.ok) {
+      throw new Error(`GitHub user not found or API error: ${profileResponse.status}`);
+    }
+
+    const profileData = await profileResponse.json();
+
+    // Fetch user repos
+    const reposResponse = await fetch(`https://api.github.com/users/${username}/repos?per_page=100&sort=updated`, {
+      headers: {
+        'Accept': 'application/vnd.github.v3+json',
+        'User-Agent': 'GitHub-Profile-Extension'
+      }
+    });
+
+    const reposData = reposResponse.ok ? await reposResponse.json() : [];
+
+    // Save to chrome storage
+    const githubData = {
+      [username]: {
+        profile: profileData,
+        repositories: reposData,
+        fetchedAt: new Date().toISOString()
+      }
+    };
+
+    if (isChromeAPIAvailable()) {
+      await new Promise((resolve, reject) => {
+        chrome.storage.local.set({ github: githubData }, () => {
+          if (chrome.runtime.lastError) {
+            reject(chrome.runtime.lastError);
+          } else {
+            resolve();
+          }
+        });
+      });
+    }
+
+    return { 
+      success: true, 
+      message: `GitHub data updated for ${username}` 
+    };
+  } catch (error) {
+    console.error('Error updating GitHub data:', error);
+    return { 
+      success: false, 
+      error: error.message 
+    };
+  }
+};
 
 class DataViewer {
   constructor() {
     this.data = null;
     this.apps = [];
     this.selectedApp = 'all';
-    this.init();
+    this.init().catch(error => {
+      console.error('Error initializing DataViewer:', error);
+      this.showError('Failed to initialize: ' + error.message);
+    });
   }
 
   async init() {
@@ -19,6 +91,11 @@ class DataViewer {
     try {
       const appsUrl = chrome.runtime.getURL('data/apps.json');
       const appsResponse = await fetch(appsUrl);
+      
+      if (!appsResponse.ok) {
+        throw new Error(`Failed to fetch apps: ${appsResponse.status}`);
+      }
+      
       const appsData = await appsResponse.json();
 
       // Sort apps: Available first, Coming Soon later
@@ -26,7 +103,25 @@ class DataViewer {
         return (a.comingSoon === b.comingSoon) ? 0 : a.comingSoon ? 1 : -1;
       });
 
-      const allStorageData = await chrome.storage.local.get(null);
+      let allStorageData = {};
+      
+      if (isChromeAPIAvailable()) {
+        allStorageData = await new Promise((resolve, reject) => {
+          try {
+            chrome.storage.local.get(null, (result) => {
+              if (chrome.runtime.lastError) {
+                reject(chrome.runtime.lastError);
+              } else {
+                resolve(result);
+              }
+            });
+          } catch (error) {
+            reject(error);
+          }
+        });
+      } else {
+        console.warn('Chrome API not available, using empty storage data');
+      }
 
       this.data = {};
       this.apps.forEach(app => {
@@ -40,6 +135,7 @@ class DataViewer {
     } catch (error) {
       console.error('Error loading data:', error);
       this.showError('Failed to load data: ' + error.message);
+      throw error;
     }
   }
 
@@ -154,6 +250,7 @@ class DataViewer {
           alert('Update functionality not yet implemented for this app.');
         }
       } catch (err) {
+        console.error('Error updating app data:', err);
         alert('Error updating data: ' + err.message);
       }
     }
@@ -163,11 +260,24 @@ class DataViewer {
     if (confirm('Are you sure you want to clear all app data? This action cannot be undone.')) {
       try {
         const appIds = this.apps.map(app => app.id);
-        await chrome.storage.local.remove(appIds);
+        if (isChromeAPIAvailable()) {
+          await new Promise((resolve, reject) => {
+            chrome.storage.local.remove(appIds, () => {
+              if (chrome.runtime.lastError) {
+                reject(chrome.runtime.lastError);
+              } else {
+                resolve();
+              }
+            });
+          });
+        } else {
+          console.warn('Chrome API not available, cannot clear data.');
+        }
         await this.loadData();
         this.render();
         alert('All app data cleared successfully!');
       } catch (err) {
+        console.error('Error clearing data:', err);
         alert('Error clearing data: ' + err.message);
       }
     }
@@ -294,6 +404,16 @@ class DataViewer {
 // Initialize the data viewer when the page loads
 let dataViewer;
 document.addEventListener('DOMContentLoaded', () => {
+  // Add global error handlers
+  window.addEventListener('unhandledrejection', (event) => {
+    console.error('Unhandled promise rejection:', event.reason);
+    event.preventDefault();
+  });
+
+  window.addEventListener('error', (event) => {
+    console.error('Global error:', event.error);
+  });
+
   dataViewer = new DataViewer();
 });
 

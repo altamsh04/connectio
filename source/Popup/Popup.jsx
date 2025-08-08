@@ -35,7 +35,11 @@ function App() {
       }
     };
 
-    initializeApp();
+    initializeApp().catch(error => {
+      console.error('Unhandled error in initializeApp:', error);
+      setError('Failed to initialize app. Please try again.');
+      setLoading(false);
+    });
   }, []);
 
   const loadApps = async () => {
